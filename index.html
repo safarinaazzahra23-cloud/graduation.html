@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎓 Happy Graduation Besty 🎓</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(180deg, #002b7a, #000);
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    h1 { font-size: 2.5em; color: #ffd700; margin-bottom: 10px; text-shadow: 0 0 10px #ffd700; }
+    .photo { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 4px solid #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.7); margin: 20px 0; }
+    h2 { font-size: 1.4em; margin-bottom: 10px; }
+    p { max-width: 450px; font-size: 1.1em; color: #e0e0e0; line-height: 1.5em; margin-bottom: 30px; }
+
+    .gift-box { position: relative; width: 130px; height: 130px; background: #0057b8; border-radius: 10px; cursor: pointer; transition: all 0.6s ease; box-shadow: 0 0 20px rgba(0, 87, 184, 0.8); }
+    .gift-box .lid { position: absolute; width: 130px; height: 35px; background: #003b80; top: 0; left: 0; border-radius: 10px 10px 0 0; transition: all 0.6s ease; }
+    .gift-box .ribbon { position: absolute; background: gold; width: 18px; height: 130px; left: 56px; top: 0; }
+    .toy { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); transition: all 1s ease-in-out; opacity: 0; }
+    .gift-box.open .lid { transform: rotateX(120deg); top: -50px; }
+    .gift-box.open .toy { top: -110px; opacity: 1; }
+
+    .audio-controls { margin-top: 10px; display: flex; justify-content: center; gap: 10px; }
+    .audio-btn { padding: 8px 16px; border: none; border-radius: 8px; background: #ffd700; color: #002b7a; font-weight: bold; cursor: pointer; }
+
+    canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+
+    @media (max-width: 600px) { h1 { font-size: 2em; } .photo { width: 150px; height: 150px; } p { max-width: 90%; } }
+  </style>
+</head>
+
+<body>
+  <h1>🎓 Happy Graduation Besty 🎓</h1>
+  <img src="besty.jpg" alt="Foto Wisuda Besty" class="photo" loading="lazy" onerror="this.outerHTML='<div style=\'font-size:100px;\'>📸</div>'" />
+  <h2 id="nama">Firda Amalia Dewi</h2>
+  <p id="pesan">Happy Graduation Best!! 🌸<br>Semoga sukses selalu ke depannya ya, Besty 💙</p>
+
+  <!-- Kotak hadiah -->
+  <div class="gift-box" id="giftBox" aria-label="Klik untuk membuka kado">
+    <div class="lid"></div>
+    <div class="ribbon"></div>
+    <img src="boneka.png" alt="Boneka Hadiah" class="toy" width="100" loading="lazy" onerror="this.outerHTML='<div class=\'toy\' style=\'font-size:50px;\'>🧸</div>'">
+  </div>
+
+  <!-- Kontrol audio -->
+  <div class="audio-controls">
+    <button class="audio-btn" id="playAudio" aria-label="Putar musik">▶️ Putar Musik</button>
+    <button class="audio-btn" id="pauseAudio" aria-label="Jeda musik">⏸️ Jeda Musik</button>
+  </div>
+
+  <audio id="bgMusic" loop preload="none">
+    <source src="music.mp3" type="audio/mpeg">
+    Browser Anda tidak mendukung audio.
+  </audio>
+
+  <canvas id="fireworks"></canvas>
+
+  <script>
+    // Kontrol Audio
+    const audio = document.getElementById('bgMusic');
+    document.getElementById('playAudio').addEventListener('click', () => audio.play().catch(err => console.log("Autoplay diblokir:", err)));
+    document.getElementById('pauseAudio').addEventListener('click', () => audio.pause());
+
+    // Animasi Kado & Fireworks
+    const giftBox = document.getElementById('giftBox');
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    let fireworks = [];
+
+    function resize() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    giftBox.addEventListener('click', () => {
+      giftBox.classList.toggle('open');
+      fireworks.push(new Firework());
+    });
+
+    class Firework {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height;
+        this.color = `hsl(${Math.random() * 360},100%,60%)`;
+        this.exploded = false;
+        this.particles = [];
+      }
+      update() {
+        if (!this.exploded && this.y < canvas.height / 2) {
+          this.exploded = true;
+          for (let i = 0; i < 30; i++)
+            this.particles.push(new Particle(this.x, this.y, this.color));
+        } else this.y -= 4;
+      }
+      draw() {
+        if (!this.exploded) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        } else this.particles.forEach(p => p.update());
+      }
+    }
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x; this.y = y; this.color = color;
+        this.vx = (Math.random() - 0.5) * 6;
+        this.vy = (Math.random() - 0.5) * 6;
+        this.life = 100;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.05;
+        this.life--;
+        if (this.life > 0) this.draw();
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
+    }
+
+    (function animate() {
+      requestAnimationFrame(animate);
+      ctx.fillStyle = "rgba(0,0,0,0.2)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      fireworks.forEach(f => { f.update(); f.draw(); });
+      fireworks = fireworks.filter(f => f.particles.some(p => p.life > 0) || !f.exploded);
+    })();
+  </script>
+</body>
+</html>
