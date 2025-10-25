@@ -52,7 +52,8 @@
     <img src="boneka.png" alt="Boneka Hadiah" class="toy" width="100" loading="lazy" onerror="this.outerHTML='<div class=\'toy\' style=\'font-size:50px;\'>🧸</div>'">
   </div>
 
-  <audio id="bgMusic" loop preload="none">
+  <!-- Audio -->
+  <audio id="bgMusic" autoplay loop preload="auto">
     <source src="music.mp3" type="audio/mpeg">
     Browser Anda tidak mendukung audio.
   </audio>
@@ -60,29 +61,19 @@
   <canvas id="fireworks"></canvas>
 
   <script>
-    // Kontrol Audio: Autoplay dengan fallback klik halaman
     const audio = document.getElementById('bgMusic');
-    let autoplayAttempted = false;
 
-    function tryPlayMusic() {
-      if (!autoplayAttempted) {
-        audio.play().catch(err => {
-          console.log("Autoplay diblokir:", err);
-          // Tunggu interaksi pengguna
-        });
-        autoplayAttempted = true;
-      }
-    }
+    // Pastikan volume normal
+    audio.volume = 0.7;
 
-    // Coba autoplay saat load
-    tryPlayMusic();
-
-    // Jika autoplay gagal, izinkan klik di halaman untuk play
+    // Jika autoplay gagal (karena browser policy), play setelah klik pertama
     document.body.addEventListener('click', () => {
-      audio.play().catch(err => console.log("Error play:", err));
+      if (audio.paused) {
+        audio.play().then(() => console.log("Musik dimulai!")).catch(err => console.log("Autoplay masih diblokir:", err));
+      }
     });
 
-    // Animasi Kado & Fireworks
+    // --- FIREWORKS ---
     const giftBox = document.getElementById('giftBox');
     const canvas = document.getElementById('fireworks');
     const ctx = canvas.getContext('2d');
@@ -95,16 +86,13 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Kembang api langsung muncul saat load (tanpa klik)
+    // Tampilkan 3 kembang api setelah 1 detik
     setTimeout(() => {
-      for (let i = 0; i < 3; i++) { // Munculkan 3 kembang api awal
-        fireworks.push(new Firework());
-      }
-    }, 1000); // Delay 1 detik setelah load
+      for (let i = 0; i < 3; i++) fireworks.push(new Firework());
+    }, 1000);
 
     giftBox.addEventListener('click', () => {
       giftBox.classList.toggle('open');
-      // Tambah kembang api lagi saat klik (opsional)
       fireworks.push(new Firework());
     });
 
@@ -157,7 +145,6 @@
 
     (function animate() {
       requestAnimationFrame(animate);
-      // Hapus efek gelap: Clear canvas setiap frame untuk reset
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       fireworks.forEach(f => { f.update(); f.draw(); });
       fireworks = fireworks.filter(f => f.particles.some(p => p.life > 0) || !f.exploded);
