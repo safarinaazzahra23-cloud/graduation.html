@@ -138,13 +138,20 @@
       }
     }
 
-    (function animate() {
-      requestAnimationFrame(animate);
-      ctx.fillStyle = "rgba(0,0,0,0.2)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      fireworks.forEach(f => { f.update(); f.draw(); });
-      fireworks = fireworks.filter(f => f.particles.some(p => p.life > 0) || !f.exploded);
-    })();
+   (function animate() {
+  requestAnimationFrame(animate);
+  // Reset canvas jika tidak ada fireworks aktif
+  if (fireworks.length === 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  } else {
+    // Gambar trail hanya jika ada fireworks
+    ctx.fillStyle = "rgba(0,0,0,0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  fireworks.forEach(f => { f.update(); f.draw(); });
+  fireworks = fireworks.filter(f => f.particles.some(p => p.life > 0) || !f.exploded);
+})();
   </script>
 </body>
 </html>
+
