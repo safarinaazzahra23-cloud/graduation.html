@@ -29,11 +29,9 @@
     .gift-box .lid { position: absolute; width: 130px; height: 35px; background: #003b80; top: 0; left: 0; border-radius: 10px 10px 0 0; transition: all 0.6s ease; }
     .gift-box .ribbon { position: absolute; background: gold; width: 18px; height: 130px; left: 56px; top: 0; }
     .toy { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); transition: all 1s ease-in-out; opacity: 0; }
+
     .gift-box.open .lid { transform: rotateX(120deg); top: -50px; }
     .gift-box.open .toy { top: -110px; opacity: 1; }
-
-    .audio-controls { margin-top: 10px; display: flex; justify-content: center; gap: 10px; }
-    .audio-btn { padding: 8px 16px; border: none; border-radius: 8px; background: #ffd700; color: #002b7a; font-weight: bold; cursor: pointer; }
 
     canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
@@ -54,12 +52,6 @@
     <img src="boneka.png" alt="Boneka Hadiah" class="toy" width="100" loading="lazy" onerror="this.outerHTML='<div class=\'toy\' style=\'font-size:50px;\'>🧸</div>'">
   </div>
 
-  <!-- Kontrol audio -->
-  <div class="audio-controls">
-    <button class="audio-btn" id="playAudio" aria-label="Putar musik">▶️ Putar Musik</button>
-    <button class="audio-btn" id="pauseAudio" aria-label="Jeda musik">⏸️ Jeda Musik</button>
-  </div>
-
   <audio id="bgMusic" loop preload="none">
     <source src="music.mp3" type="audio/mpeg">
     Browser Anda tidak mendukung audio.
@@ -68,10 +60,14 @@
   <canvas id="fireworks"></canvas>
 
   <script>
-    // Kontrol Audio
+    // Kontrol Audio: Autoplay tanpa tombol
     const audio = document.getElementById('bgMusic');
-    document.getElementById('playAudio').addEventListener('click', () => audio.play().catch(err => console.log("Autoplay diblokir:", err)));
-    document.getElementById('pauseAudio').addEventListener('click', () => audio.pause());
+    audio.autoplay = true;
+    audio.play().catch(err => {
+      console.log("Autoplay diblokir:", err);
+      // Opsional: Alert atau pesan di halaman jika ingin
+      // alert("Musik autoplay diblokir. Refresh halaman atau klik di mana saja untuk memulai.");
+    });
 
     // Animasi Kado & Fireworks
     const giftBox = document.getElementById('giftBox');
@@ -86,8 +82,16 @@
     window.addEventListener('resize', resize);
     resize();
 
+    // Kembang api langsung muncul saat load (tanpa klik)
+    setTimeout(() => {
+      for (let i = 0; i < 3; i++) { // Munculkan 3 kembang api awal
+        fireworks.push(new Firework());
+      }
+    }, 1000); // Delay 1 detik setelah load
+
     giftBox.addEventListener('click', () => {
       giftBox.classList.toggle('open');
+      // Tambah kembang api lagi saat klik (opsional)
       fireworks.push(new Firework());
     });
 
@@ -138,20 +142,13 @@
       }
     }
 
-   (function animate() {
-  requestAnimationFrame(animate);
-  // Reset canvas jika tidak ada fireworks aktif
-  if (fireworks.length === 0) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  } else {
-    // Gambar trail hanya jika ada fireworks
-    ctx.fillStyle = "rgba(0,0,0,0.2)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-  fireworks.forEach(f => { f.update(); f.draw(); });
-  fireworks = fireworks.filter(f => f.particles.some(p => p.life > 0) || !f.exploded);
-})();
+    (function animate() {
+      requestAnimationFrame(animate);
+      // Hapus efek gelap: Clear canvas setiap frame untuk reset
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      fireworks.forEach(f => { f.update(); f.draw(); });
+      fireworks = fireworks.filter(f => f.particles.some(p => p.life > 0) || !f.exploded);
+    })();
   </script>
 </body>
 </html>
-
