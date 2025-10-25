@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎓 Happy Graduation Besty 🎓</title>
+  <title>🎓Happy Graduation Besty🎓</title>
 
   <style>
     body {
@@ -60,13 +60,26 @@
   <canvas id="fireworks"></canvas>
 
   <script>
-    // Kontrol Audio: Autoplay tanpa tombol
+    // Kontrol Audio: Autoplay dengan fallback klik halaman
     const audio = document.getElementById('bgMusic');
-    audio.autoplay = true;
-    audio.play().catch(err => {
-      console.log("Autoplay diblokir:", err);
-      // Opsional: Alert atau pesan di halaman jika ingin
-      // alert("Musik autoplay diblokir. Refresh halaman atau klik di mana saja untuk memulai.");
+    let autoplayAttempted = false;
+
+    function tryPlayMusic() {
+      if (!autoplayAttempted) {
+        audio.play().catch(err => {
+          console.log("Autoplay diblokir:", err);
+          // Tunggu interaksi pengguna
+        });
+        autoplayAttempted = true;
+      }
+    }
+
+    // Coba autoplay saat load
+    tryPlayMusic();
+
+    // Jika autoplay gagal, izinkan klik di halaman untuk play
+    document.body.addEventListener('click', () => {
+      audio.play().catch(err => console.log("Error play:", err));
     });
 
     // Animasi Kado & Fireworks
